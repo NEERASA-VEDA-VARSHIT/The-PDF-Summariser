@@ -5,7 +5,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { extractTextFromPDF, createTextFile } from "./services/pdfService";
 import { processWithGemini } from "./services/geminiService";
 
-function Apps() {
+function App() {
   const [isSummarized, setIsSummarized] = useState(false);
   const [showFlashCards, setShowFlashCards] = useState(false);
   const [fileContent, setFileContent] = useState("");
@@ -219,4 +219,4 @@ function Apps() {
   );
 }
 
-export default Apps;
+export default App;
