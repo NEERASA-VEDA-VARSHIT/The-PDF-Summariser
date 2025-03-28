@@ -26,31 +26,34 @@ function App() {
   }, []);
 
   const handleFileUpload = useCallback(async () => {
-    if (!file) return;
+  if (!file) {
+    alert('Please upload a PDF file before proceeding.');
+    return;
+  }
 
-    setIsLoading(true);
-    setError(null);
+  setIsLoading(true);
+  setError(null);
 
-    try {
-      const txtFile = await extractTextFromPDF(file);
-      const fileContent = await txtFile.text();
-      
-      const result = await processText(fileContent, {
-        flashcardCount,
-        flashcardTopic,
-        summaryDepth,
-      });
+  try {
+    const txtFile = await extractTextFromPDF(file);
+    const fileContent = await txtFile.text();
+    
+    const result = await processText(fileContent, {
+      flashcardCount,
+      flashcardTopic,
+      summaryDepth,
+    });
 
-      setFileContent(result.summary);
-      setFlashcardData(result.flashcards);
-      setActiveTab('summary');
-    } catch (error) {
-      console.error('Processing error:', error);
-      setError(error.message);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [file, flashcardCount, flashcardTopic, summaryDepth]);
+    setFileContent(result.summary);
+    setFlashcardData(result.flashcards);
+    setActiveTab('summary');
+  } catch (error) {
+    console.error('Processing error:', error);
+    setError(error.message);
+  } finally {
+    setIsLoading(false);
+  }
+}, [file, flashcardCount, flashcardTopic, summaryDepth]);
 
   const renderUploadSection = () => (
     <div className="max-w-3xl mx-auto">
