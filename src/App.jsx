@@ -156,39 +156,51 @@ function App() {
         {/* Navigation Tabs */}
         <div className="max-w-7xl mx-auto px-4 mb-8">
           <div className="flex justify-center space-x-4 mb-8">
-            <button
-              onClick={() => setActiveTab('upload')}
-              className={`px-6 py-2 rounded-lg font-medium transition-all
-                ${activeTab === 'upload'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-            >
-              Upload
-            </button>
-            <button
-              onClick={() => setActiveTab('summary')}
-              className={`px-6 py-2 rounded-lg font-medium transition-all
-                ${activeTab === 'summary'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              disabled={!fileContent}
-            >
-              Summary
-            </button>
-            <button
-              onClick={() => setActiveTab('flashcards')}
-              className={`px-6 py-2 rounded-lg font-medium transition-all
-                ${activeTab === 'flashcards'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              disabled={!flashcardData.length}
-            >
-              Flashcards
-            </button>
-          </div>
+          <button
+            onClick={() => setActiveTab('upload')}
+            className={`px-6 py-2 rounded-lg font-medium transition-all
+              ${activeTab === 'upload'
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+          >
+            Upload
+          </button>
+          
+          <button
+            onClick={() => {
+              if (!fileContent) {
+                alert('Please process a PDF first!');
+                return;
+              }
+              setActiveTab('summary');
+            }}
+            className={`px-6 py-2 rounded-lg font-medium transition-all
+              ${activeTab === 'summary'
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+          >
+            Summary
+          </button>
+          
+          <button
+            onClick={() => {
+              if (!flashcardData.length) {
+                alert('Generate flashcards by processing a PDF first!');
+                return;
+              }
+              setActiveTab('flashcards');
+            }}
+            className={`px-6 py-2 rounded-lg font-medium transition-all
+              ${activeTab === 'flashcards'
+                ? 'bg-blue-600 text-white shadow-lg'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+              }`}
+          >
+            Flashcards
+          </button>
+        </div>
 
           {error && (
             <div className="max-w-3xl mx-auto mb-8">
