@@ -9,17 +9,16 @@ const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
 const generationConfig = {
-  temperature: 0.1, // Reduced for more focused responses
-  maxOutputTokens: 1024, // Reduced token limit
-  topP: 0.7, // Reduced for more focused responses
+  temperature: 0.05, // Further reduced for more deterministic responses
+  maxOutputTokens: 1024, // Adjusted token limit
+  topP: 0.5, // Reduced for more focused responses
 };
 
 function chunkText(text, maxLength = 4000) {
-  // Use paragraphs as natural break points
   const paragraphs = text.split(/\n\s*\n/);
   const chunks = [];
   let currentChunk = '';
-  
+
   for (const paragraph of paragraphs) {
     if ((currentChunk + paragraph).length > maxLength) {
       if (currentChunk) chunks.push(currentChunk.trim());
@@ -28,7 +27,7 @@ function chunkText(text, maxLength = 4000) {
       currentChunk += (currentChunk ? '\n\n' : '') + paragraph;
     }
   }
-  
+
   if (currentChunk) chunks.push(currentChunk.trim());
   return chunks;
 }
@@ -46,13 +45,12 @@ function extractJSONFromText(text) {
       }
     }
 
-    // Efficient regex patterns
     const summaryPattern = /summary["']?\s*:\s*["']([^"'}]+)["']?/i;
     const flashcardsPattern = /flashcards["']?\s*:\s*\[([\s\S]*?)\]/i;
-    
+
     const summary = text.match(summaryPattern)?.[1]?.trim() || '';
     const flashcardsMatch = text.match(flashcardsPattern);
-    
+
     const flashcards = [];
     if (flashcardsMatch) {
       const cardPattern = /\{[^}]*question["']?\s*:\s*["']([^"']+)["']?[^}]*answer["']?\s*:\s*["']([^"']+)["']?[^}]*\}/g;
@@ -71,7 +69,7 @@ function extractJSONFromText(text) {
 
 async function processSingleChunk(chunk, options) {
   const { flashcardTopic } = options;
-  
+
   const prompt = `Analyze this text and provide a concise JSON response with a brief summary and key flashcards.
 ${flashcardTopic ? `Focus specifically on: ${flashcardTopic}\n` : ''}
 Format:
@@ -101,7 +99,6 @@ export async function processText(text, options) {
       chunks.map(chunk => processSingleChunk(chunk, options))
     );
 
-    // Combine results efficiently
     const summary = results
       .map(r => r.summary)
       .filter(Boolean)
