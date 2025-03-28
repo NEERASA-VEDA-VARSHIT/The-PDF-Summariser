@@ -2,8 +2,8 @@ import { useState, useCallback } from "react";
 import Summarize from "./Summarize";
 import Flashcard from "./Flashcard";
 import ErrorBoundary from "./components/ErrorBoundary";
-import { extractTextFromPDF, createTextFile } from "./services/pdfService";
-import { processWithGemini } from "./services/geminiService";
+import { extractTextFromPDF } from './services/fileProcessor';
+ import { processText } from './services/gemini';
 
 function App() {
   const [isSummarized, setIsSummarized] = useState(false);
