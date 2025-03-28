@@ -5,7 +5,7 @@ import Footer from './Footer.jsx';
 
 createRoot(document.getElementById('root')).render(
   <>
-    <Apps />
+    <App />
     <Footer />
   </>
 );
