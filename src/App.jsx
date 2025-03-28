@@ -1,212 +1,222 @@
-import { useState, useCallback } from 'react';
-import Summarize from './Summarize';
-import Flashcard from './Flashcard';
-import ErrorBoundary from './components/ErrorBoundary';
-import { extractTextFromPDF } from './services/fileProcessor';
-import { processText } from './services/gemini';
+import { useState, useCallback } from "react";
+import Summarize from "./Summarize";
+import Flashcard from "./Flashcard";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { extractTextFromPDF, createTextFile } from "./services/pdfService";
+import { processWithGemini } from "./services/geminiService";
 
-function App() {
-  const [activeTab, setActiveTab] = useState('upload'); // 'upload', 'summary', 'flashcards'
-  const [fileContent, setFileContent] = useState('');
+function Apps() {
+  const [isSummarized, setIsSummarized] = useState(false);
+  const [showFlashCards, setShowFlashCards] = useState(false);
+  const [fileContent, setFileContent] = useState("");
   const [flashcardData, setFlashcardData] = useState([]);
   const [file, setFile] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Options state
   const [flashcardCount, setFlashcardCount] = useState(5);
-  const [flashcardTopic, setFlashcardTopic] = useState('');
-  const [summaryDepth, setSummaryDepth] = useState('Detailed');
+  const [flashcardTopic, setFlashcardTopic] = useState("");
+  const [summaryDepth, setSummaryDepth] = useState("Detailed");
+
+  const handleSummarizeClick = useCallback((e) => {
+    e.preventDefault();
+    if (!file) {
+      alert("Please upload a file first.");
+      return;
+    }
+    setIsSummarized(true);
+    setShowFlashCards(false);
+  }, [file]);
+
+  const handleGenerateFlashCardsClick = useCallback((e) => {
+    e.preventDefault();
+    if (!file) {
+      alert("Please upload a file first.");
+      return;
+    }
+    setShowFlashCards(true);
+    setIsSummarized(false);
+  }, [file]);
 
   const handleFileChange = useCallback((e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
       setFile(selectedFile);
+      // Reset previous results when a new file is selected
+      setFileContent("");
+      setFlashcardData([]);
       setError(null);
     }
   }, []);
 
   const handleFileUpload = useCallback(async () => {
-    if (!file) return;
+    if (!file) {
+      alert("Please upload a file first.");
+      return;
+    }
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const txtFile = await extractTextFromPDF(file);
-      const fileContent = await txtFile.text();
+      // Extract text from PDF
+      const text = await extractTextFromPDF(file);
+      const txtFile = createTextFile(text);
       
-      const result = await processText(fileContent, {
+      // Process with Gemini API
+      const result = await processWithGemini(await txtFile.text(), {
         flashcardCount,
         flashcardTopic,
-        summaryDepth,
+        summaryDepth
       });
-
+      
       setFileContent(result.summary);
       setFlashcardData(result.flashcards);
-      setActiveTab('summary');
+      setIsSummarized(true);
     } catch (error) {
-      console.error('Processing error:', error);
-      setError(error.message);
+      console.error("Processing error:", error);
+      setError(`Error: ${error.message}`);
     } finally {
       setIsLoading(false);
     }
   }, [file, flashcardCount, flashcardTopic, summaryDepth]);
 
-  const renderUploadSection = () => (
-    <div className="max-w-3xl mx-auto">
-      <div className="card">
-        <h2 className="text-2xl font-bold text-gray-800 mb-4">Upload PDF</h2>
-        <p className="text-gray-600 mb-6">
-          *PDF files up to 10MB are supported. Daily limit: 10 files.
-        </p>
+  return (
+    <ErrorBoundary>
+      <div className="relative bg-gradient-to-r from-blue-500 to-blue-700 py-16">
+        <div className="absolute inset-0 flex justify-center items-center">
+          <h1 className="text-white text-4xl md:text-5xl font-bold text-center">
+            Your PDF Summarizer
+          </h1>
+        </div>
+      </div>
 
-        <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
-          <div className="space-y-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12">
+        <header className="text-center mb-8">
+          <h2 className="text-lg font-medium text-gray-700">
+            Upload your PDF file
+          </h2>
+          <p className="text-sm text-gray-500 mb-4">
+            *Only PDF files are supported
+          </p>
+
+          <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
             <input
               type="file"
               accept=".pdf"
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              className="border-2 border-gray-300 p-3 rounded-md w-full md:w-2/3 text-gray-700"
+              id="pdf-upload"
               onChange={handleFileChange}
               disabled={isLoading}
+              aria-label="Upload PDF file"
             />
-
-            <div className="space-y-4">
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Number of Flashcards:
-                </label>
-                <input
-                  type="number"
-                  value={flashcardCount}
-                  onChange={(e) => setFlashcardCount(Number(e.target.value))}
-                  className="w-full px-4 py-2 border rounded-lg"
-                  min="1"
-                  max="20"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Flashcard Topic (optional):
-                </label>
-                <input
-                  type="text"
-                  value={flashcardTopic}
-                  onChange={(e) => setFlashcardTopic(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg"
-                  placeholder="Enter a specific topic"
-                />
-              </div>
-
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Summary Detail Level:
-                </label>
-                <select
-                  value={summaryDepth}
-                  onChange={(e) => setSummaryDepth(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-lg"
-                >
-                  <option value="Concise">Concise</option>
-                  <option value="Detailed">Detailed</option>
-                  <option value="In-Depth">In-Depth</option>
-                </select>
-              </div>
-            </div>
-
             <button
               type="button"
-              className="btn-primary w-full"
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200"
               onClick={handleFileUpload}
               disabled={isLoading || !file}
+              aria-busy={isLoading}
             >
               {isLoading ? (
-                <div className="flex items-center justify-center">
-                  <div className="animate-spin h-5 w-5 mr-3 border-2 border-white border-t-transparent rounded-full"></div>
+                <>
+                  <span className="inline-block mr-2 animate-spin">⟳</span>
                   Processing...
-                </div>
-              ) : (
-                'Process PDF'
-              )}
+                </>
+              ) : "Upload"}
             </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
+          </form>
 
-  return (
-    <ErrorBoundary>
-      <div className="min-h-screen pb-12">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-blue-800 py-12 mb-12">
-          <div className="max-w-7xl mx-auto px-4">
-            <h1 className="text-4xl md:text-5xl font-bold text-white text-center mb-4">
-              PDF Processor
-            </h1>
-            <p className="text-blue-100 text-center text-lg">
-              Summarize PDFs and Create Flashcards
-            </p>
-          </div>
-        </div>
-
-        {/* Navigation Tabs */}
-        <div className="max-w-7xl mx-auto px-4 mb-8">
-          <div className="flex justify-center space-x-4 mb-8">
-            <button
-              onClick={() => setActiveTab('upload')}
-              className={`px-6 py-2 rounded-lg font-medium transition-all
-                ${activeTab === 'upload'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-            >
-              Upload
-            </button>
-            <button
-              onClick={() => setActiveTab('summary')}
-              className={`px-6 py-2 rounded-lg font-medium transition-all
-                ${activeTab === 'summary'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              disabled={!fileContent}
-            >
-              Summary
-            </button>
-            <button
-              onClick={() => setActiveTab('flashcards')}
-              className={`px-6 py-2 rounded-lg font-medium transition-all
-                ${activeTab === 'flashcards'
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              disabled={!flashcardData.length}
-            >
-              Flashcards
-            </button>
-          </div>
-
-          {error && (
-            <div className="max-w-3xl mx-auto mb-8">
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
-                <p className="text-red-700">{error}</p>
-              </div>
+          <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label htmlFor="flashcardCount" className="block text-gray-700">
+                Number of Flashcards:
+              </label>
+              <input
+                type="number"
+                id="flashcardCount"
+                value={flashcardCount}
+                onChange={(e) => setFlashcardCount(Math.max(1, parseInt(e.target.value) || 1))}
+                className="border rounded p-2 w-full"
+                min="1"
+                disabled={isLoading}
+                aria-label="Number of flashcards to generate"
+              />
             </div>
-          )}
+            <div>
+              <label htmlFor="flashcardTopic" className="block text-gray-700">
+                Flashcard Topic (optional):
+              </label>
+              <input
+                type="text"
+                id="flashcardTopic"
+                value={flashcardTopic}
+                onChange={(e) => setFlashcardTopic(e.target.value)}
+                className="border rounded p-2 w-full"
+                placeholder="Enter a specific topic"
+                disabled={isLoading}
+                aria-label="Flashcard topic"
+              />
+            </div>
+            <div>
+              <label htmlFor="summaryDepth" className="block text-gray-700">
+                Summary Detail/Depth:
+              </label>
+              <select
+                id="summaryDepth"
+                value={summaryDepth}
+                onChange={(e) => setSummaryDepth(e.target.value)}
+                className="border rounded p-2 w-full"
+                disabled={isLoading}
+                aria-label="Summary detail level"
+              >
+                <option value="Concise">Concise</option>
+                <option value="Detailed">Detailed</option>
+                <option value="In-Depth">In-Depth</option>
+                <option value="Comprehensive">Comprehensive</option>
+              </select>
+            </div>
+          </div>
 
-          {activeTab === 'upload' && renderUploadSection()}
-          {activeTab === 'summary' && fileContent && (
-            <Summarize Text={fileContent} onBack={() => setActiveTab('upload')} />
-          )}
-          {activeTab === 'flashcards' && flashcardData.length > 0 && (
-            <Flashcard flashcards={flashcardData} onBack={() => setActiveTab('upload')} />
-          )}
-        </div>
+          <div className="flex flex-col md:flex-row justify-center mt-6 gap-4">
+            <button
+              onClick={handleSummarizeClick}
+              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition duration-200"
+              disabled={isLoading || !fileContent}
+              aria-label="Show summary"
+            >
+              Summarize PDF
+            </button>
+            <button
+              onClick={handleGenerateFlashCardsClick}
+              className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition duration-200"
+              disabled={isLoading || flashcardData.length === 0}
+              aria-label="Show flashcards"
+            >
+              Generate Flash Cards
+            </button>
+          </div>
+        </header>
+
+        {isLoading && (
+          <div className="mt-4 flex flex-col items-center">
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
+            <p className="text-gray-500 mt-2" aria-live="polite">Processing your document with Gemini...</p>
+          </div>
+        )}
+          
+        {error && (
+          <div className="mt-4 text-red-500 bg-red-50 p-3 rounded border border-red-200" role="alert">
+            <strong>Error:</strong> {error}
+          </div>
+        )}
+
+        {isSummarized && <Summarize Text={fileContent} />}
+
+        {showFlashCards && <Flashcard flashcards={flashcardData} />}
       </div>
     </ErrorBoundary>
-
   );
 }
 
-export default App;
+export default Apps;
