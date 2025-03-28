@@ -121,7 +121,7 @@ function App() {
               type="button"
               className="btn-primary w-full"
               onClick={handleFileUpload}
-              disabled={isLoading || !file}
+              disabled={isLoading}
             >
               {isLoading ? (
                 <div className="flex items-center justify-center">
@@ -170,7 +170,7 @@ function App() {
           <button
             onClick={() => {
               if (!fileContent) {
-                alert('Please process a PDF first!');
+                alert('Please upload a PDF file before proceeding.');
                 return;
               }
               setActiveTab('summary');
@@ -187,7 +187,7 @@ function App() {
           <button
             onClick={() => {
               if (!flashcardData.length) {
-                alert('Generate flashcards by processing a PDF first!');
+                alert('Generate flashcards by upload a PDF file before proceeding.');
                 return;
               }
               setActiveTab('flashcards');
