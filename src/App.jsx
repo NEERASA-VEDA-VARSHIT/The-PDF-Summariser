@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import ErrorBoundary from './components/ErrorBoundary';
 import { extractTextFromPDF } from './services/fileProcessor';
 import { processText } from './services/gemini';
+import Navbar from "./components/Navbar";
 
 // Lazy loaded components
 const Summarize = lazy(() => import("./components/Summarize"));
@@ -60,6 +61,7 @@ function App() {
   return (
     <ErrorBoundary>
       <Router>
+        <Navbar />
         <Suspense fallback={<div>Loading...</div>}>
           <div className="min-h-screen pb-12">
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 py-12 mb-12">
