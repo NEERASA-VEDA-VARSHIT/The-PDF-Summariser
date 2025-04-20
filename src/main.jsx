@@ -1,11 +1,13 @@
-import { createRoot } from 'react-dom/client';
-import { RouterProvider } from 'react-router-dom';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
 import { PDFProvider } from './context/PDFContext';
-import { router } from './routes';
+import AppRouter from './routes'; // make sure this is the default export from routes/index.jsx
 import './index.css';
 
-createRoot(document.getElementById('root')).render(
-  <PDFProvider>
-    <RouterProvider router={router} />
-  </PDFProvider>
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <PDFProvider>
+      <AppRouter />
+    </PDFProvider>
+  </React.StrictMode>
 );
