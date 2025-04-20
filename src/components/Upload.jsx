@@ -2,15 +2,18 @@ import React, { useContext } from "react";
 import { AppContext } from "../context/AppContext";
 
 const Upload = () => {
-  const { uploadedFile, setUploadedFile } = useContext(AppContext);
+  const { state, setState } = useContext(AppContext);
 
   const handleFileChange = (event) => {
-    setUploadedFile(event.target.files[0]);
+    setState((prevState) => ({
+      ...prevState,
+      uploadedFile: event.target.files[0],
+    }));
   };
 
   const handleUpload = () => {
-    if (uploadedFile) {
-      console.log("Uploading file:", uploadedFile.name);
+    if (state.uploadedFile) {
+      console.log("Uploading file:", state.uploadedFile.name);
       // Add your upload logic here
     } else {
       console.log("No file selected");
