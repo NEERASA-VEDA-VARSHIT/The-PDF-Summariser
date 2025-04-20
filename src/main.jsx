@@ -1,17 +1,11 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
-import "./index.css";
-import App from "./App";
-import Footer from "./components/Footer";
-import AppProvider from "./context/AppContext"; 
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import App from './App.jsx';
+import Footer from './Footer.jsx';
 
-ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <AppProvider>
-      <>
-        <App />
-        <Footer />
-      </>
-    </AppProvider>
-  </React.StrictMode>
+createRoot(document.getElementById('root')).render(
+  <>
+    <App />
+    <Footer />
+  </>
 );
