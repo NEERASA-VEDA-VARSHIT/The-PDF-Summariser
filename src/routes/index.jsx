@@ -4,7 +4,7 @@ import Upload from '../pages/Upload';
 import Summary from '../pages/Summary';
 import Flashcards from '../pages/Flashcards';
 
-export default function router() {
+export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
@@ -17,4 +17,3 @@ export default function router() {
     </BrowserRouter>
   );
 }
-
