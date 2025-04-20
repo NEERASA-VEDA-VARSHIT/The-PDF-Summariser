@@ -11,6 +11,7 @@
     "start": "vite preview"
   },
   "dependencies": {
+    "react-router-dom": "^6.x.x",
     "@google/generative-ai": "^0.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
