@@ -1,11 +1,11 @@
 import { createRoot } from 'react-dom/client';
+import { RouterProvider } from 'react-router-dom';
+import { PDFProvider } from './context/PDFContext';
+import { router } from './routes';
 import './index.css';
-import App from './App.jsx';
-import Footer from './Footer.jsx';
 
 createRoot(document.getElementById('root')).render(
-  <>
-    <App />
-    <Footer />
-  </>
+  <PDFProvider>
+    <RouterProvider router={router} />
+  </PDFProvider>
 );
