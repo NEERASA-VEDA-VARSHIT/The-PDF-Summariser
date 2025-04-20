@@ -1,15 +1,12 @@
-import React, { useContext } from "react";
-import { AppContext } from "../context/AppContext";
+import React from 'react';
 
-function Summarize({ onBack }) {
-  const { state } = useContext(AppContext);
-
+function Summarize({ Text, onBack }) {
   const handleDownload = () => {
-    const blob = new Blob([state.summary], { type: "text/plain" });
+    const blob = new Blob([Text], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
+    const a = document.createElement('a');
     a.href = url;
-    a.download = "summary.txt";
+    a.download = 'summary.txt';
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -20,11 +17,13 @@ function Summarize({ onBack }) {
     <div className="max-w-3xl mx-auto">
       <div className="card">
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Summary</h2>
+        
         <div className="bg-gray-50 rounded-lg p-6 mb-6">
           <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">
-            {state.summary}
+            {Text}
           </p>
         </div>
+
         <div className="flex justify-between items-center">
           <button
             onClick={onBack}
@@ -32,7 +31,11 @@ function Summarize({ onBack }) {
           >
             Back to Upload
           </button>
-          <button onClick={handleDownload} className="btn-primary">
+          
+          <button
+            onClick={handleDownload}
+            className="btn-primary"
+          >
             Download Summary
           </button>
         </div>
