@@ -5,9 +5,9 @@ import { extractTextFromPDF } from './services/fileProcessor';
 import { processText } from './services/gemini';
 
 // Lazy loaded components
-const Summarize = lazy(() => import("./Summarize"));
-const Flashcard = lazy(() => import("./Flashcard"));
-const Upload = lazy(() => import("./components/Upload")); // Create this component for the upload logic
+const Summarize = lazy(() => import("./components/Summarize"));
+const Flashcard = lazy(() => import("./components/Flashcard"));
+const Upload = lazy(() => import("./components/Upload")); 
 
 function App() {
   const [fileContent, setFileContent] = useState('');
@@ -62,7 +62,6 @@ function App() {
       <Router>
         <Suspense fallback={<div>Loading...</div>}>
           <div className="min-h-screen pb-12">
-            {/* Header */}
             <div className="bg-gradient-to-r from-blue-600 to-blue-800 py-12 mb-12">
               <div className="max-w-7xl mx-auto px-4">
                 <h1 className="text-4xl md:text-5xl font-bold text-white text-center mb-4">
@@ -74,7 +73,6 @@ function App() {
               </div>
             </div>
 
-            {/* Routes */}
             <Routes>
               <Route
                 path="/"
