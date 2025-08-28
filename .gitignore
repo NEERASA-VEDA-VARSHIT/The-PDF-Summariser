@@ -36,3 +36,11 @@ yarn-error.log*
 # Cache
 .cache
 .eslintcache
+
+# SSH keys and sensitive files
+*.pem
+*.key
+id_*
+!id_*.pub
+.ssh/id_*
+!.ssh/id_*.pub

@@ -42,5 +42,31 @@ The PDF Summariser is a tool designed to streamline the process of understanding
 5. **Open the Application**  
    Navigate to `http://localhost:3000` in your browser to view the app.
 
+## SSH Setup for GitHub (Optional)
+
+If you need to use SSH for git operations (e.g., in CI/CD pipelines or when using SSH URLs), you can set up trusted SSH connections to GitHub using our provided script:
+
+```bash
+# Run the SSH setup script
+./scripts/setup-github-ssh.sh
+```
+
+This script will:
+- Add GitHub's host keys to your `~/.ssh/known_hosts` file
+- Eliminate host key verification prompts when connecting to GitHub
+- Work in environments where `ssh-keyscan` might not be available
+
+**Note**: This script only sets up host key verification. For SSH authentication, you'll still need to:
+1. Generate an SSH key pair: `ssh-keygen -t ed25519 -C "your_email@example.com"`
+2. Add the public key to your GitHub account
+3. See [GitHub's SSH documentation](https://docs.github.com/en/authentication/connecting-to-github-with-ssh) for detailed instructions
+
+### CI/CD Integration
+
+The repository includes a GitHub Actions workflow (`.github/workflows/ssh-setup.yml`) that automatically sets up SSH connections in CI/CD environments. This workflow:
+- Runs on push and pull request events
+- Sets up GitHub host keys for trusted connections
+- Verifies that git operations work correctly
+
 ## Contributing
 Contributions are welcome! If you'd like to contribute, please fork the repository, create a new branch, and submit a pull request.

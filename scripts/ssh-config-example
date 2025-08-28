@@ -1,0 +1,42 @@
+# SSH Configuration for GitHub
+# This file can be used as a reference for SSH configurations
+
+# Basic SSH config that can be added to ~/.ssh/config
+# to improve GitHub SSH connections
+
+Host github.com
+    HostName github.com
+    User git
+    Port 22
+    # Use SSH key authentication
+    PreferredAuthentications publickey
+    # Keep connections alive
+    ServerAliveInterval 60
+    ServerAliveCountMax 10
+    # Use compression for better performance
+    Compression yes
+    # Strict host key checking (set to 'no' only if host keys are pre-configured)
+    StrictHostKeyChecking yes
+    # Specify which key to use (uncomment and update path as needed)
+    # IdentityFile ~/.ssh/id_ed25519
+    # IdentitiesOnly yes
+
+# Alternative configuration for environments where port 22 is blocked
+# GitHub also supports SSH over HTTPS (port 443)
+Host github-443
+    HostName ssh.github.com
+    User git
+    Port 443
+    PreferredAuthentications publickey
+    ServerAliveInterval 60
+    ServerAliveCountMax 10
+    Compression yes
+    StrictHostKeyChecking yes
+    # Use this with: git clone git@github-443:user/repo.git
+
+# Host key fingerprints for verification (current as of 2024)
+# You can verify these by running: ssh-keygen -lf ~/.ssh/known_hosts
+#
+# RSA key fingerprint: SHA256:nThbg6kXUpJWGl7E1IGOCspRomTxdCARLviKw6E5SY8
+# ECDSA key fingerprint: SHA256:p2QAMXNIC1TJYWeIOttrVc98/R1BUFWu3/LiyKgUfQM  
+# Ed25519 key fingerprint: SHA256:+DiY3wvvV6TuJJhbpZisF/zLDA0zPMSvHdkr4UvCOqU

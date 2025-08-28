@@ -1,0 +1,51 @@
+name: SSH Setup for GitHub
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  setup-ssh:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup SSH connection to GitHub
+      run: |
+        # Create SSH directory if it doesn't exist
+        mkdir -p ~/.ssh
+        chmod 700 ~/.ssh
+        
+        # Add GitHub's host keys to known_hosts to avoid host key verification
+        echo "Adding GitHub host keys to known_hosts..."
+        ssh-keyscan -H github.com >> ~/.ssh/known_hosts 2>/dev/null || {
+          echo "ssh-keyscan failed, adding known host keys manually..."
+          echo "github.com ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCj7ndNxQowgcQnjshcLrqPEiiphnt+VTTvDP6mHBL9j1aNUkY4Ue1gvwnGLVlOhGeYrnZaMgRK6+PKCUXaDbC7qtbW8gIkhL7aGCsOr/C56SJMy/BCZfxd1nWzAOxSDPgVsmerOBYfNqltV9/hWCqBywINIR+5dIg6JTJ72pcEpEjcYgXkE2YEFXV1JHnsKgbLWNlhScqb2UmyRkQyytRLtL+38TGxkxCflmO+5Z8CSSNY7GidjMIZ7Q4zMjA2n1nGrlTDkzwDCsw+wqFPGQA179cnfGWOWRVruj16z6XyvxvjJwbz0wQZ75XK5tKSb7FNyeIEs4TT4jk+S4dhPeAUC5y+bDYirYgM4GC7uEnztnZyaVWQ7B381AK4Qdrwt51ZqExKbQpTUNn+EjqoTwvqNj4kqx5QUCI0ThS/YkOxJCXmPUWZbhjpCg56i+2aB6CmK2JGhn57K5mj0MNdBXA4/WnwH6XoPWJzK5Nyu2zB3nAZp+S5hpQs+p1vN1/wsjk=" >> ~/.ssh/known_hosts
+          echo "github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=" >> ~/.ssh/known_hosts
+          echo "github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl" >> ~/.ssh/known_hosts
+        }
+        
+        chmod 600 ~/.ssh/known_hosts
+        
+        echo "GitHub host keys added successfully!"
+        echo "Contents of known_hosts:"
+        cat ~/.ssh/known_hosts
+        
+    - name: Test SSH connection (optional)
+      run: |
+        # Note: This will fail if no SSH key is set up, but that's expected
+        # This is just to verify the host key setup worked
+        echo "Testing SSH connection to GitHub (will show authentication error if no SSH key is configured):"
+        ssh -o ConnectTimeout=10 -T git@github.com 2>&1 || echo "SSH connection test completed (authentication may have failed, but host key verification should be OK)"
+        
+    - name: Verify Git operations work
+      run: |
+        echo "Testing git operations..."
+        git status
+        git remote -v
+        echo "Git operations verified successfully!"
